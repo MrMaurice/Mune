@@ -1,0 +1,20 @@
+[
+  {
+    "id":"1",
+    "parent":"",
+    "title":"article1",
+    "text":"ouai ceci est le textes"
+  },
+  {
+    "id":"2",
+    "parent":"",
+    "title":"article2",
+    "text":"ouai ceci est le textes 2"
+  },
+  {
+    "id":"3",
+    "parent":"1",
+    "title":"article3",
+    "text":"ouai ceci est le textes 3"
+  }
+]

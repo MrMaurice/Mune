@@ -1,0 +1,18 @@
+language: php
+
+php:
+   - 5.3
+   - 5.4
+   - 5.5
+
+env:
+   global:
+      secure: fSunKASjs8ACVawX5APnjXjJjqmk0y3Gt5EtB4ndMCR3V9Z4/gx46husoiMBBmIfeZr8FneHghyQcVypKZXzXlQrkVSZzoZ2Q2C73tgpT7kmo9F68DWrZD0LzI8WqmlMUE5VDwLAXYJ/cWl3KRuofdhZCVx0Gm9itTRTNzM6B/o=
+
+before_script:
+   - wget http://getcomposer.org/composer.phar
+   - sh -c "if $TRAVIS_SECURE_ENV_VARS; then php composer.phar config --global github-oauth.github.com $GITHUB_OAUTH_TOKEN; fi"
+
+script:
+   - ant -Dmysql.schema=symfony2 -Dmysql.host=127.0.0.1 -Dmysql.user=travis -Dmysql.password=travis -Dmysql.root.user=root -Dmysql.root.password= -Dsystem.composer=composer.phar -Dcomposer.dev=dev -Dapp.secret=ThisTokenIsNotSoSecretChangeIt
+   - ant -f build-dev.xml CI-phpunit

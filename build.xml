@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SymfonyProject" default="init" basedir=".">
+    <property file="build.local.properties" />
+    <property file="build.properties" />
+
+    <import file="${lib.path.mysql}/mysql.ant" />
+    <import file="${lib.path.composer}/composer.ant" />
+    <import file="${lib.path.symfony}/ci.ant" />
+
+    <target name="init" depends="mysql-init,symfony-deploy-parameters,composer-init,CI-deploy-symfony,symfony-deploy-chmod">
+        <echo message="${ant.project.name} Init - OK" />
+    </target>
+</project>

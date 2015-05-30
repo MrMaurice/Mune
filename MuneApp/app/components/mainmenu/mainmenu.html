@@ -1,0 +1,8 @@
+<nav >
+    <h3 ng-click="selectParent()">< {{jinks.title}}</h3>
+    <ul class="nav nav-tabs">
+        <li ng-cloak ng-repeat="link in jinks.child" >
+            <a ng-cloak ng-class="{upable: {{ link.child }} }" ng-click="select()" ng-href="#/article/{{link.id}}" >{{link.title}} </a>
+        </li>
+    </ul>
+</nav>

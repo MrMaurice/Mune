@@ -1,0 +1,18 @@
+<div ng-if="signin">
+    <form name="inform" ng-submit="ghtfuykf(Edarticle)">
+        <p ng-if="error" >{{ error }}</p>
+        <p><label>Titre : </label><input name="titre" type="text" placeholder="Titre" ng-model="Edarticle.titre" required/></p>
+        <p ng-repeat="parent in Edarticle.parents"><label>Article Parent : {{ parent.titre }}</label><a ng-if="" >Remove Parent</a></p>
+        <p><label>Ajouter un parents : </label><select value="{{article.status}}">
+            <option ng-repeat="article in allarticle">{{article.name}}
+                 <option  ng-repeat="article in article.child">{{article.name}}
+                    <option  ng-repeat="article in article.child">{{article.name}}
+                    </option>
+                </option>
+            </option>
+        </select></p>
+        <p><textarea>{{ Edarticle.texte}}</textarea></p>
+        <p><input type="submit" value="Sauvgarder"/></p>
+    </form>
+
+</div>

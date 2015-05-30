@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <property file="${lib.path.symfony}/ci.properties" />
+
+    <macrodef name="app-console">
+        <attribute name="dir" default="${basedir}" />
+        <attribute name="command" />
+        <attribute name="env" default="${symfony.env}" />
+        <attribute name="failonerror" default="true" />
+
+        <element name="args" optional="true" />
+
+        <sequential>
+            <exec executable="php" dir="@{dir}" failonerror="@{failonerror}">
+                <arg value="app/console" />
+                <arg value="@{command}" />
+                <arg value="--env=@{env}" />
+                <args />
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target name="symfony-deploy-parameters">
+        <fail unless="mysql.host">Property 'mysql.host' must be set</fail>
+        <fail unless="mysql.schema">Property 'mysql.schema' must be set</fail>
+        <fail unless="mysql.user">Property 'mysql.user' must be set</fail>
+        <fail unless="mysql.password">Property 'mysql.password' must be set</fail>
+        <fail unless="app.secret">Property 'app.secret' must be set</fail>
+
+        <concat destfile="${basedir}/app/config/parameters.yml">
+            <fileset dir="${basedir}/app/config" includes="parameters_default.yml" />
+        </concat>
+
+        <replace file="${basedir}/app/config/parameters.yml">
+            <replacefilter token="[[DATABASE_DRIVER]]" value="pdo_mysql" />
+            <replacefilter token="[[DATABASE_HOST]]" value="${mysql.host}" />
+            <replacefilter token="[[DATABASE_SCHEMA]]" value="${mysql.schema}" />
+            <replacefilter token="[[DATABASE_USER]]" value="${mysql.user}" />
+            <replacefilter token="[[DATABASE_PASSWORD]]" value="${mysql.password}" />
+            <replacefilter token="[[APP_SECRET]]" value="${app.secret}" />
+            <replacefilter token="[[ASSETIC_WATCHER_ENABLED]]" value="${assetic_watcher.enabled}" />
+        </replace>
+    </target>
+
+    <target name="symfony-deploy-chmod">
+        <chmod perm="777" dir="${basedir}/app/cache" />
+        <chmod perm="777" dir="${basedir}/app/logs" />
+
+        <chmod perm="777" type="both">
+            <fileset dir="${basedir}/app/cache">
+                <include name="**/*"/>
+                <exclude name=".gitkeep" />
+            </fileset>
+            <fileset dir="${basedir}/app/logs">
+                <include name="**/*"/>
+                <exclude name=".gitkeep" />
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="CI-deploy-symfony" depends="symfony-deploy-parameters" description="Run deploy scripts">
+        <delete includeemptydirs="true" quiet="true">
+            <fileset dir="${basedir}/app/cache/${symfony.env}">
+                <include name="**"/>
+            </fileset>
+            <fileset dir="${basedir}/app/cache/${symfony.env}_old">
+                <include name="**"/>
+            </fileset>
+        </delete>
+
+        <app-console command="cache:warmup" />
+        <app-console command="doctrine:schema:update">
+            <args>
+                <arg value="--force" />
+                <arg value="--no-interaction" />
+            </args>
+        </app-console>
+        <app-console command="doctrine:migrations:status" />
+        <app-console command="doctrine:migrations:migrate">
+            <args>
+                <arg value="--no-interaction" />
+            </args>
+        </app-console>
+        <app-console command="assets:install">
+            <args>
+                <arg value="--symlink" />
+                <arg value="web" />
+            </args>
+        </app-console>
+        <app-console command="assetic:dump" />
+    </target>
+</project>

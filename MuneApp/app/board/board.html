@@ -1,0 +1,18 @@
+<div>
+    <h1>Espace Utilisateur : {{ user.name }} {{ user.surname }}</h1>
+    <h2>Mes Articles</h2>
+    <p><a href="#/edit">Proposer un  article</a></p>
+    <ul>
+        <li ng-repeat="article in user.articles">
+            {{ article.name }} status :
+            <select value="{{article.status}}">
+                <option value="draft" >draft</option>
+                <option value="proposed">proposed</option>
+                <option value="published">published</option>
+            </select>
+            <a  ng-href="#/edit/{{ article.id }}" >modifier</a> <a  ng-click="supprArticle(article)">supprimer</a>
+        </li>
+    </ul>
+
+    
+</div>

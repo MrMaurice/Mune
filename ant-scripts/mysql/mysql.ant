@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MySQL">
+    <target name="mysql-init" depends="mysql-check-connection">
+        <antcall target="mysql-create" />
+    </target>
+
+    <target name="mysql-create" depends="mysql-check-connection,mysql-check-root" if="mysql.root.user">
+        <!-- MySQL Connector/J v5.0.8, http://dev.mysql.com/downloads/connector/j/ -->
+
+        <sql classpath="${lib.path.mysql}/mysql-connector-java-5.1.22-bin.jar" driver="com.mysql.jdbc.Driver" url="jdbc:mysql://${mysql.host}" userid="${mysql.root.user}" password="${mysql.root.password}">
+            CREATE DATABASE IF NOT EXISTS ${mysql.schema} CHARACTER SET utf8 COLLATE utf8_general_ci;
+            GRANT ALL ON ${mysql.schema}.* TO ${mysql.user}@${mysql.host} IDENTIFIED BY '${mysql.password}';
+        </sql>
+        <echo message="MySQL database created OK" />
+    </target>
+
+    <target name="mysql-drop" depends="mysql-check-connection,mysql-check-root" if="mysql.root.user">
+        <sql classpath="${lib.path.mysql}/mysql-connector-java-5.1.22-bin.jar" driver="com.mysql.jdbc.Driver" url="jdbc:mysql://${mysql.host}" userid="${mysql.root.user}" password="${mysql.root.password}">
+            DROP DATABASE IF EXISTS ${mysql.schema};
+        </sql>
+        <echo message="MySQL database droped OK" />
+    </target>
+
+    <target name="mysql-check-connection">
+        <fail unless="mysql.schema">'mysql.schema' property must be set</fail>
+        <fail unless="mysql.host">'mysql.host' property must be set</fail>
+        <fail unless="mysql.user">'mysql.user' property must be set</fail>
+        <fail unless="mysql.password">'mysql.password' property must be set</fail>
+
+        <echo message="MySQL OK" />
+    </target>
+
+    <target name="mysql-check-root" if="mysql.root.user">
+        <fail unless="mysql.root.password">'mysql.root.password' property must be set</fail>
+
+        <echo message="MySQL super user OK" />
+    </target>
+</project>
