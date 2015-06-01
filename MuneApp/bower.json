@@ -1,8 +1,8 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
+  "name": "munejdr",
+  "description": "jdr",
   "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
+  "homepage": "",
   "license": "MIT",
   "private": true,
   "dependencies": {
@@ -11,6 +11,7 @@
     "angular-loader": "1.2.x",
     "angular-mocks": "~1.2.x",
     "angular-resource":"1.2.x",
+    "angular-animate":"1.2.x",
     "html5-boilerplate": "~4.3.0"
   }
 }

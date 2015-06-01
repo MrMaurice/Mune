@@ -7,9 +7,10 @@ angular.module('main.components.top', [])
         restrict: 'E',
 
         scope: {},
-        controller: function($scope, $element, $http) {
+        controller: function($scope, $element, $http, $window) {
+            var protocol = $window.location.protocol;
             var links = $scope.links = [];
-            $http.get("database/menu/top.json").success(function (data, status, headers, config){
+            $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots").success(function (data, status, headers, config){
                 links = $scope.links = data;
             });
 

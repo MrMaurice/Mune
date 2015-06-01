@@ -7,6 +7,7 @@
  */
 
 namespace AppBundle\Entity;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -50,10 +51,46 @@ class User implements UserInterface, \Serializable
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=60, unique=true)
+     * @ORM\Column(type="string", length=60)
      */
     private $role;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Article", mappedBy="author")
+     */
+    private $articles;
+
+    /**
+     * @return mixed
+     */
+    public function getArticles()
+    {
+        return $this->articles;
+    }
+
+    /**
+     * @param mixed $articles
+     */
+    public function setArticles($articles)
+    {
+        $this->articles = $articles;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * @param mixed $isActive
+     */
+    public function setIsActive($isActive)
+    {
+        $this->isActive = $isActive;
+    }
 
 
     /**
@@ -63,6 +100,7 @@ class User implements UserInterface, \Serializable
 
     public function __construct()
 {
+    $this->articles = new ArrayCollection();
     $this->isActive = true;
     // may not be needed, see section on salt below
      $this->salt = md5(uniqid(null, true));
@@ -129,7 +167,7 @@ class User implements UserInterface, \Serializable
         //$factory = $this->container->get('security.encoder_factory');
         //$encoder = $factory->getEncoder($this);
         //$encoder->encodePassword($pass, $this->getSalt());
-        $this->password = $pass;
+        $this->password = hash_hmac("sha256",$pass,$this->getSalt());
     }
 
     /**
@@ -171,6 +209,37 @@ class User implements UserInterface, \Serializable
 {
     return array('ROLE_ADMIN');
 }
+
+    public function hasArticle(Article $article)
+    {
+        return $this->articles->contains($article);
+    }
+
+
+
+    /**
+     * Add article
+     *
+     * @param Article $article
+     */
+
+    public function addArticle(Article $article)
+
+    {
+        $this->articles[] = $article;
+    }
+
+    /**
+     * Remove article
+     *
+     * @param Article $article
+     */
+    public function removeArticle(Article $article)
+
+    {
+        $this->articles->removeElement($article);
+    }
+
 
     /**
      * @inheritDoc

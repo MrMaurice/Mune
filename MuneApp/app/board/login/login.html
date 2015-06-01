@@ -1,7 +1,7 @@
 <div ng-if="signin">
     <form name="inform" ng-submit="checkCredentials(registredUser)">
         <p ng-if="serverError">{{ serverError }}</p>
-        <p><label>Identifiant : </label><input name="mail" type="email" placeholder="Identifiant" ng-model="registredUser.mail" required/></p>
+        <p><label>Identifiant : </label><input name="email" type="email" placeholder="Identifiant" ng-model="registredUser.email" required/></p>
         <p><label>Mot de passe : </label><input name="pass" type="password" placeholder="Mot de passe" ng-model="registredUser.password" required/></p>
         <p><label>Se souvenir de moi. </label><input name="remember" type="checkbox" ng-model="registredUser.remember"/></p>
         <p><input type="submit" value="Connexion"/></p>
@@ -10,13 +10,13 @@
 </div>
 
 <div ng-if="!signin">
-    <form ng-submit="subscribe(registeringUser)">
+    <form ng-submit="subscribe(registringUser)">
         <h2>S'Inscrire</h2>
-        <p><label>Adresse Courriel : </label><input name="mail" type="email" placeholder="Identifiant" ng-model="registringUser.mail" required/></p>
+        <p><label>Adresse Courriel : </label><input name="email" type="email" placeholder="Identifiant" ng-model="registringUser.email" required/></p>
         <p><label>Nom : </label><input name="name" type="text" placeholder="Nom" ng-model="registringUser.name" required/></p>
         <p><label>Prénom : </label><input name="surname" type="text" ng-model="registringUser.surname" placeholder="Prenom" required/></p>
         <p><label>Mot de passe : </label><input name="pass" type="password" placeholder="Mot de passe" ng-model="registringUser.password" required/></p>
-        <p><label>Confirmation mot de passe : </label><input name="confirm" type="password" placeholder="Mot de passe" ng-model="registringUser.confirm" required/></p>
+        <p><label>Confirmation mot de passe : </label><input name="confirm" type="password" placeholder="Mot de passe" ng-model="registringUser.confirm" pattern="{{registringUser.password}}" required/></p>
         <p><label>J'ai lu et j'accepte les conditions d'utilisation du site et la politique de confidentialité du site. </label><input name="cgu" ng-model="registringUser.cgu" type="checkbox" required/></p>
         <p><input type="submit" value="S'enregistrer"/></p>
     </form>

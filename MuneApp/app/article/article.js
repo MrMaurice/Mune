@@ -13,11 +13,12 @@ angular.module('main.article', ['ngRoute'])
   });
 }])
 
-.controller('articleCtrl', function($rootScope,$scope, $routeParams, $http) {
-    if($rootScope.panel != "mainmenu"){
+.controller('articleCtrl', function($rootScope,$scope, $routeParams, $http, $window) {
+    if($rootScope.panel != "mainmenu" && $rootScope.changePanel ){
         $rootScope.changePanel("mainmenu");
     }
-    $http.get("database/article/"+$routeParams.id+".json").success(function (data, status, headers, config){
+        var protocol = $window.location.protocol;
+    $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$routeParams.id).success(function (data, status, headers, config){
         $rootScope.article = data;
         $rootScope.name = data.title;
 

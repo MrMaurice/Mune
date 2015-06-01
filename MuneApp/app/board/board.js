@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('main.board', ['ngRoute'])
+angular.module('main.board', ['ngRoute','main.board.edit'])
 
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/board', {
@@ -14,18 +14,22 @@ angular.module('main.board', ['ngRoute'])
 
     }])
     .controller('loginCtrl', function($rootScope,$scope, $http, $window) {
-        if($rootScope.panel !== ""){
+        if($rootScope.panel !== "" && $rootScope.changePanel ){
             $rootScope.changePanel("");
         }
-        /*console.log($window.location.protocol);
-         if($window.location.protocol !== "https"){
+        console.log($window.location.protocol);
+        /* if($window.location.protocol !== "https"){
          $window.location.protocol = "https";
          }*/
+        var protocol = "http:";
+        if($rootScope.usereId != undefined){
+            $window.location.href = "#/board";
+        }
         $scope.signin = true;
 
-        if(localStorage['mail'] && localStorage['pass']){
+        if(localStorage['email'] && localStorage['pass']){
             $scope.registredUser={
-                mail:localStorage['mail'],
+                email:localStorage['email'],
                 password:localStorage['pass'],
                 remember:true
             };
@@ -45,71 +49,95 @@ angular.module('main.board', ['ngRoute'])
             // alert(iform.mail+" "+iform.password);
             if(iform.remember){
                 //alert(iform.mail+" "+iform.password);
-                localStorage['mail'] = iform.mail;
+                localStorage['email'] = iform.email;
                 localStorage['pass'] = iform.password;
             }
             else {
-                localStorage['mail'] = null;
+                localStorage['email'] = null;
                 localStorage['pass'] = null;
             }
 
-            $http.put('http://localhost/MuneJDR/MuneServ/web/app_dev.php/users/login',{"password":iform.password,"email":iform.mail}).
-                success(function (data){
-                    $rootScope.currentTocken = 'AHHKDIC4548djy41FGGHJ';
+            $http.put(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/login',{"password":iform.password,"email":iform.email}).
+                success(function (data,st,h,c){
+                    console.log(data);
+                    $rootScope.usereId = data.id;
+                    $rootScope.currentTocken = data.salt;
 
                     $window.location.href = "#/board";
+
                 }).
-                error(function (data){
-                    $scope.serverError = 'some Server Error';
+                error(function (data,st,h,c){
+
+
+                    $scope.serverError = 'Erreur : '+data.error;
+                    console.log(data);
                 });
         }
 
         $scope.subscribe = function (iform){
             console.log(iform);
+            console.log($scope.registringUser);
             // alert(iform.mail+" "+iform.password);
-            if(iform.cgu){
+
                 //alert(iform.mail+" "+iform.password);
-                $http.put('http://localhost', {user: "userinfo"}).
+                iform.username = iform.name+" "+iform.surname;
+
+                $http.post(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users', iform).
                     success(function (data){
                         $scope.toSignIn();
                         $scope.serverError = "Vous êtes enregistré, vous pouvez vous connecter."
                     }).
-                    error(function (data){
-                        $scope.serverError = 'some Server Error';
+                    error(function (data,st,h,c){
+                        if(st === 500){
+                            $scope.serverError = 'Un compte avec cet email existe déjà.';
+                        }
+                        else {
+                            $scope.serverError = 'Erreur : '+data.error;
+                        }
+
                     });
-            }
+
 
         }
 
     })
 
     .controller('boardCtrl', function($rootScope,$scope, $http, $window) {
-        /*console.log($window.location.protocol);
-         if($window.location.protocol !== "https"){
+        console.log($window.location.protocol);
+         /*if($window.location.protocol !== "https"){
          $window.location.protocol = "https";
          }*/
-        $http.get('http://localhost/',{tocken: $rootScope.currentTocken})
 
+        if($rootScope.usereId == undefined){
+            $window.location.href = "#/login";
+        }
 
-            .error(function (data){
-                $window.location.href = "#/login";
-            })
-            .success(function (data){
-                if($rootScope.panel !== ""){
+        else {
+                if($rootScope.panel !== "" && $rootScope.changePanel ){
                     $rootScope.changePanel("");
                 }
-                $scope.user = data;
+                var protocol = "http:";
+                $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId).
+                    success (function (data){
+                        $scope.user = data;
+                    }).
+                    error(function (data){
+                        $window.location.href = "#/login";
+                    });
+
 
                 $scope.supprArticle = function (item){
-                    $http.get('http://localhost/',{tocken: $rootScope.currentTocken, article: item.id})
-                        .success(function(){
-                            for(var i in $scope.user.articles){
-                                if($scope.user.articles[i] == item){
-                                    $scope.user.articles.slice(i,1);
-                                    break;
-                                }
-                            }
-                        })
+                    if($window.confirm('Vous allez supprimer définitivement cet article.')){
+                        $http.delete(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId+"/articles/"+item.id)
+                            .success(function(data){
+                                $scope.user = data;
+
+                            })
+                            .error(function (data){
+                                $scope.error = data.error;
+                            })
+                    }
+
                 }
 
 
@@ -117,7 +145,7 @@ angular.module('main.board', ['ngRoute'])
 
 
 
-            });
+            };
 
 
     });

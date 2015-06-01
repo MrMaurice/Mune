@@ -1,4 +1,6 @@
-
+articles:
+    resource: AppBundle\Controller\ArticlesController
+    type:     rest
 users:
     type:     rest
     resource: AppBundle\Controller\UsersController

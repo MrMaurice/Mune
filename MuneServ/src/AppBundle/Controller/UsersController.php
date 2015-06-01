@@ -4,6 +4,10 @@ namespace AppBundle\Controller;
 
 use Seld\JsonLint\JsonParser;
 use AppBundle\Entity\User;
+use AppBundle\Entity\Article;
+
+use Doctrine\Common\Collections\ArrayCollection;
+
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -30,37 +34,43 @@ class UsersController extends FOSRestController
         }*/
 
         $cred = json_decode($request->getContent());
-        if(!isset($cred->password) || !isset($cred->email)){
-            $return = array("error"=>"MalformedRequest");
-            $code = 422;
+
+        if(!isset($cred->password) || !isset($cred->email)) {
+
+            $view->setData(array("error" => "MalformedRequest -" . $cred));
+            $view->setStatusCode(422);
+            return $view;
         }
         else {
             $user = $this->getDoctrine()
                 ->getRepository('AppBundle\Entity\User')
                 ->findOneBy(array('email'=>$cred->email)) ;
 
-            if(isset($user) && !empty($user)){
-                if($user->getPassword() == $cred->password){
-
+            if(isset($user) && !empty($user) && $user != null){
+                if($user->getPassword() == hash_hmac("sha256",$cred->password,$user->getSalt())){//$cred->password){
                     $view->setStatusCode(200);
                     $view->setData($user);
 
-                    $session = new Session();
-                    $session->start();
+                    $session = $request->getSession();
+
+                    if(!$session->isStarted()){
+                        $session->start();
+                    }
                     $session->set('mail',$user->getEmail());
+                    return $view;
                 } else {
                     $view->setStatusCode(412);
                     $view->setData(array("error"=>"Wrong Password"));
-
+                    return $view;
                 }
             } else {
                 $view->setStatusCode(412);
-                    $view->setData(array("error"=>"Unknown User"));
-
+                $view->setData(array("error"=>"Unknown User"));
+                return $view;
             }
         }
 
-        return $view;
+
 
     }
 
@@ -129,7 +139,7 @@ class UsersController extends FOSRestController
                 ->getRepository('AppBundle\Entity\User')
                 ->findOneBy(array('id'=>$slug)) ;
 
-            if($sessmail === $user->getEmail()){
+            if( isset($user) && $sessmail == $user->getEmail()){
                 $view = View::create();
                 $view->setData($user);
 
@@ -204,13 +214,87 @@ class UsersController extends FOSRestController
     {} // "delete_user"   [DELETE] /users/{slug}
 
     public function getUserArticlesAction($slug)
-    {} // "get_user_comments"    [GET] /users/{slug}/articles
+    {
+
+
+    } // "get_user_comments"    [GET] /users/{slug}/articles
 
     public function newUserArticlesAction($slug)
     {} // "new_user_comments"    [GET] /users/{slug}/articles/new
 
-    public function postUserArticlesAction($slug)
-    {} // "post_user_comments"   [POST] /users/{slug}/articles
+    public function postUserArticlesAction($slug, Request $request)
+    {
+        if($sessmail = $request->getSession()->get('mail')){
+
+            $user = $this->getDoctrine()
+                ->getRepository('AppBundle\Entity\User')
+                ->findOneBy(array('id'=>$slug)) ;
+
+            if( isset($user) && $sessmail == $user->getEmail()){
+
+                $articl = json_decode($request->getContent());
+
+                $article = new Article();
+
+                if(!isset($articl->title) || !isset($articl->texte) ){
+                    $return = array('error'=>'MalformedRequest');
+                    $code = 422;
+                    $view = View::create();
+                    $view->setStatusCode($code);
+                    $view->setData($return);
+
+                    return $view;
+                } else {
+                    $code = 200;
+                    $em = $this->getDoctrine()->getManager();
+                    $article->setTitle($articl->title);
+                    $article->setTexte($articl->texte);
+                    if(isset($articl->parents)){
+                        foreach($articl->parents as $pare){
+                            $p = $this->getDoctrine()
+                                ->getRepository('AppBundle\Entity\Article')
+                                ->findOneBy(array('id'=>$pare)) ;
+                            $article->addParent($p);
+                            $p->addChild($article);
+                            $em->persist($p);
+                        }
+                    }
+
+
+                    $article->setAuthor($user);
+                    $article->setStatus("draft");
+
+                    $em->persist($article);
+                    $em->flush();
+
+                    $return = $article;
+
+                    $view = View::create();
+                    $view->setStatusCode($code);
+                    $view->setData($return);
+
+                    return $view;
+
+                }
+
+            } else {
+                $view = View::create();
+                $view->setStatusCode(401);
+                $view->setData(array("error"=>"need authentification"));
+
+                return $view;
+            }
+
+
+        } else {
+            $view = View::create();
+            $view->setStatusCode(401);
+            $view->setData(array("error"=>"need authentification"));
+
+            return $view;
+        }
+
+    } // "post_user_comments"   [POST] /users/{slug}/articles
 
     public function getUserArticleAction($slug, $id)
     {} // "get_user_comment"     [GET] /users/{slug}/articles/{id}
@@ -218,14 +302,181 @@ class UsersController extends FOSRestController
     public function editUserArticleAction($slug, $id)
     {} // "edit_user_comment"    [GET] /users/{slug}/articles/{id}/edit
 
-    public function putUserArticleAction($slug, $id)
-    {} // "put_user_comment"     [PUT] /users/{slug}/articles/{id}
+    public function putUserArticleAction($slug, $id,Request $request)
+    {
+        function findOneById($arr,$id){
+            foreach($arr as $line){
+                if(trim($line) == $id){
+                    return $line;
+                }
+            }
+            return null;
+        }
+
+        if($sessmail = $request->getSession()->get('mail')){
+
+            $user = $this->getDoctrine()
+                ->getRepository('AppBundle\Entity\User')
+                ->findOneBy(array('id'=>$slug)) ;
+
+            if( isset($user) && $sessmail == $user->getEmail()){
+
+                $articl = json_decode($request->getContent());
+
+                $article = $this->getDoctrine()
+                    ->getRepository('AppBundle\Entity\Article')
+                    ->findOneBy(array('id'=>$id)) ;
+
+                if(!isset($articl->title) || !isset($articl->texte) ){
+                    $return = array('error'=>'MalformedRequest');
+                    $code = 422;
+                    $view = View::create();
+                    $view->setStatusCode($code);
+                    $view->setData($return);
+
+                    return $view;
+                } else {
+                    $code = 200;
+                    $em = $this->getDoctrine()->getManager();
+                    $article->setTitle($articl->title);
+                    $article->setTexte($articl->texte);
+                    if(isset($articl->parents)){
+                        foreach($articl->parents as $pare){
+                            $p = $this->getDoctrine()
+                                ->getRepository('AppBundle\Entity\Article')
+                                ->findOneBy(array('id'=>$pare)) ;
+                            if(isset($p) && !$article->hasParent($p)){
+                                $article->addParent($p);
+                                $p->addChild($article);
+                                $em->persist($p);
+                            }
+                        }
+                        //var_dump($article->getParents()->toArray());
+                        foreach($article->getParents()->toArray() as $curA){
+                            //var_dump($curA);
+                            if(findOneById($articl->parents,$curA->getId()) == null){
+
+                                $article->removeParent($curA);
+                                $curA->removeChild($article);
+                                $em->persist($curA);
+                            }
+
+                        }
+
+
+
+
+                    }
+
+
+                    $article->setAuthor($user);
+                    $article->setStatus($articl->status);
+
+                    $em->persist($article);
+                    $em->flush();
+
+                    $return = $article;
+
+                    $view = View::create();
+                    $view->setStatusCode($code);
+                    $view->setData($return);
+
+                    return $view;
+
+                }
+
+            } else {
+                $view = View::create();
+                $view->setStatusCode(401);
+                $view->setData(array("error"=>"need authentification"));
+
+                return $view;
+            }
+
+
+        } else {
+            $view = View::create();
+            $view->setStatusCode(401);
+            $view->setData(array("error"=>"need authentification"));
+
+            return $view;
+        }
+
+    } // "put_user_comment"     [PUT] /users/{slug}/articles/{id}
 
     public function removeUserArticleAction($slug, $id)
     {} // "remove_user_comment"  [GET] /users/{slug}/comments/{id}/remove
 
-    public function deleteUserArticleAction($slug, $id)
-    {} // "delete_user_comment"  [DELETE] /users/{slug}/comments/{id}
+    public function deleteUserArticleAction($slug, $id, Request $request)
+    {
+        if($sessmail = $request->getSession()->get('mail')){
+
+            $user = $this->getDoctrine()
+                ->getRepository('AppBundle\Entity\User')
+                ->findOneBy(array('id'=>$slug)) ;
+
+            if( isset($user) && $sessmail == $user->getEmail()){
+
+
+                    $article = $this->getDoctrine()
+                    ->getRepository('AppBundle\Entity\Article')
+                    ->findOneBy(array('id'=>$id)) ;
+
+                    if($article->getChildrens()->count() > 0 ){
+                        $view = View::create();
+                        $view->setStatusCode(412);
+                        $view->setData(array("error"=>"article has childrens"));
+
+                        return $view;
+                    }
+
+
+
+                    $em = $this->getDoctrine()->getManager();
+                    $code = 200;
+
+
+                    foreach($article->getParents()->toArray() as $pare){
+
+                        $pare->removeChild($article);
+                        $em->persist($pare);
+
+                    }
+
+
+
+                    $em->remove($article);
+                    $em->flush();
+
+                    $return = $user;
+
+                    $view = View::create();
+                    $view->setStatusCode($code);
+                    $view->setData($return);
+
+                    return $view;
+
+
+
+            } else {
+                $view = View::create();
+                $view->setStatusCode(401);
+                $view->setData(array("error"=>"need authentification"));
+
+                return $view;
+            }
+
+
+        } else {
+            $view = View::create();
+            $view->setStatusCode(401);
+            $view->setData(array("error"=>"need authentification"));
+
+            return $view;
+        }
+
+
+    } // "delete_user_comment"  [DELETE] /users/{slug}/comments/{id}
 
 
 
