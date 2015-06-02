@@ -255,10 +255,10 @@ class User implements UserInterface, \Serializable
 {
     return serialize(array(
         $this->id,
-        $this->username,
-        $this->password,
+        $this->username//,
+        //$this->password,
         // see section on salt below
-        $this->salt,
+        //$this->salt,
     ));
 }
 
@@ -269,10 +269,10 @@ class User implements UserInterface, \Serializable
 {
     list (
         $this->id,
-        $this->username,
-        $this->password,
+        $this->username//,
+        //$this->password,
         // see section on salt below
-        $this->salt
+        //$this->salt
         ) = unserialize($serialized);
 }
 }

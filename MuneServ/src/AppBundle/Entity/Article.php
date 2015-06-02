@@ -52,11 +52,11 @@ class Article
 
     /**
      * @ORM\ManyToMany(targetEntity="Article", mappedBy="childrens")
-     */
-    private $parents;
+     *
+    private $parents;*/
 
     /**
-     * @ORM\ManyToMany(targetEntity="Article", inversedBy="parents")
+     * @ORM\ManyToMany(targetEntity="Article")
      */
     private $childrens;
 
@@ -97,7 +97,14 @@ class Article
      */
     public function getAuthor()
     {
-        return $this->author;
+        $auth = new User();
+        $auth->setEmail($this->author->getEmail());
+        $auth->setId($this->author->getId());
+        $auth->setUsername($this->author->getUsername());
+        $auth->setRole($this->author->getRole());
+
+
+        return null;
     }
 
     /**
@@ -158,7 +165,7 @@ class Article
 
     /**
      * @return mixed
-     */
+     *
     public function getParents()
     {
         return $this->parents;
@@ -166,7 +173,7 @@ class Article
 
     /**
      * @param mixed $parents
-     */
+     *
     public function setParents($parents)
     {
         $this->parents = $parents;
@@ -184,7 +191,7 @@ class Article
      * Add parents
      *
      * @param Article $article
-     */
+     *
 
     public function addParent(Article $article)
 
@@ -196,7 +203,7 @@ class Article
      * Remove parents
      *
      * @param Article $article
-     */
+     *
     public function removeParent(Article $article)
 
     {
@@ -206,7 +213,7 @@ class Article
     public function hasChild(Article $article)
     {
         return $this->childrens->contains($article);
-    }
+    }*/
 
 
 
@@ -236,7 +243,7 @@ class Article
 
     public function __construct()
     {
-        $this->parents = new ArrayCollection();
+        //$this->parents = new ArrayCollection();
         $this->childrens = new ArrayCollection();
     }
 

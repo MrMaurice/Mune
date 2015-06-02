@@ -19,6 +19,22 @@ class ArticlesController extends FOSRestController
 {
 
 
+    public function getParents(Article $arr){
+        $q = $this->getDoctrine()
+            ->getRepository('AppBundle\Entity\Article')
+            ->createQueryBuilder('a')
+            ->join('a.childrens', 'c')
+            ->addSelect('a')
+            ->where('c.id = :id')
+            ->setParameter('id',$arr->getId())
+            ->getQuery();
+
+        /*createQuery(
+            'SELECT * FROM `truemune_article_truemune_article` as d JOIN truemune_article as p ON p.id = d.truemune_article_source where `truemune_article_target` = :id'
+        )->setParameter('id',$arr->getId()) ;*/
+
+        return $q->getResult();
+    }
 
     public function getArticlesAction() {
         $articles = $this->getDoctrine()
@@ -39,7 +55,9 @@ class ArticlesController extends FOSRestController
         $outArticles = array();
 
         foreach ($articles as $art){
-            if($art->getParents()->count() < 1){
+            if(sizeOf($this->getParents($art)) < 1){
+                $art->setAuthor(null);
+                $art->getChildren()->forEach(function (item){});
                 $outArticles[] = $art;
             }
         }

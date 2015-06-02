@@ -254,7 +254,7 @@ class UsersController extends FOSRestController
                             $p = $this->getDoctrine()
                                 ->getRepository('AppBundle\Entity\Article')
                                 ->findOneBy(array('id'=>$pare)) ;
-                            $article->addParent($p);
+                            //$article->addParent($p);
                             $p->addChild($article);
                             $em->persist($p);
                         }
@@ -298,7 +298,23 @@ class UsersController extends FOSRestController
 
     public function getUserArticleAction($slug, $id)
     {} // "get_user_comment"     [GET] /users/{slug}/articles/{id}
+    public function getParents(Article $arr){
+        $q = $this->getDoctrine()
+            ->getRepository('AppBundle\Entity\Article')
+            ->createQueryBuilder('a')
+            ->join('a.childrens', 'c')
+            ->addSelect('a')
+            ->where('c.id = :id')
+            ->setParameter('id',$arr->getId())
+            ->getQuery();
 
+        /*createQuery(
+            'SELECT * FROM `truemune_article_truemune_article` as d JOIN truemune_article as p ON p.id = d.truemune_article_source where `truemune_article_target` = :id'
+        )->setParameter('id',$arr->getId()) ;*/
+
+        return $q->getResult();
+
+    }
     public function editUserArticleAction($slug, $id)
     {} // "edit_user_comment"    [GET] /users/{slug}/articles/{id}/edit
 
@@ -345,18 +361,27 @@ class UsersController extends FOSRestController
                             $p = $this->getDoctrine()
                                 ->getRepository('AppBundle\Entity\Article')
                                 ->findOneBy(array('id'=>$pare)) ;
-                            if(isset($p) && !$article->hasParent($p)){
-                                $article->addParent($p);
-                                $p->addChild($article);
-                                $em->persist($p);
+                            if(isset($p) ){
+                                //$article->addParent($p);&& !$article->hasParent($p)
+                                $hasP = false;
+                                foreach($this->getParents($article) as $curA){
+                                    if ($curA === $p){
+                                        $hasP = true;
+                                    }
+                                }
+                                if(!$hasP){
+                                    $p->addChild($article);
+                                    $em->persist($p);
+                                }
+
                             }
                         }
                         //var_dump($article->getParents()->toArray());
-                        foreach($article->getParents()->toArray() as $curA){
+                        foreach($this->getParents($article) as $curA){
                             //var_dump($curA);
                             if(findOneById($articl->parents,$curA->getId()) == null){
 
-                                $article->removeParent($curA);
+                                //$article->removeParent($curA);
                                 $curA->removeChild($article);
                                 $em->persist($curA);
                             }
