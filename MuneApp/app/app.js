@@ -4,6 +4,7 @@
 angular.module('main', [
     'ngRoute',
     'ngAnimate',
+    'ngSanitize',
     'main.home',
     'main.article',
     'main.board',

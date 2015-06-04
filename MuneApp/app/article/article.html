@@ -1,4 +1,4 @@
 
 <h2 ng-cloak="" >{{ article.title }}</h2>
-<p ng-cloak="">{{ article.texte}}</p>
+<div ng-cloak="" ng-bind-html="article.texte"></div>
 <p><sub>{{ article.author.username }}</sub></p>

@@ -1,5 +1,5 @@
 <ul class="nav nav-tabs">
     <li ng-repeat="link in links" >
-        <a ng-href="#/article/{{link.id}}" >{{link.title}}</a>
+        <a  ng-click="select($event)" route="{{link.id}}" ng-href="#/article/{{link.id}}" >{{link.title}}</a>
     </li>
 </ul>

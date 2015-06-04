@@ -52,10 +52,60 @@ angular.module('main.components.main', [])
                 }
                 return null;
             };
+            var getByName = function(array,_name){
+                for(var i in array){
+                    if(array[i].title==_name){
+                        return array[i];
+                    }
+                }
+                return null;
+            };
+            $scope.getParentsElByName = function (_tab,_name){
+                var r = [];
+                var rparent = [];
+                var out = [];
+                for(var i in _tab){
+                    if(_tab[i].title == _name){
+
+                        return [];
+                    } else if(_tab[i].childrens.length > 0 ) {//&& getById(_tab[i].childrens,_name) !== null
+
+                        rparent.push(_tab[i]);
+                        var direct =  getByName(_tab[i].childrens,_name);
+                        var uhqshjsq = (function(){
+                            var t= _tab[i];
+                            return $scope.getParentsElByName(t.childrens,_name);
+                        })();
+                        if(direct !== null){
+                            r.push(_tab[i]);
+
+                        }
+                        else {
+                            for (var w in uhqshjsq){
+                                if(uhqshjsq[w] !== null && uhqshjsq[w] !== []){
+                                    r.push(uhqshjsq[w]);
+                                }
+                            }
+
+
+                        }
+
+
+                    }
+                }
+                for (var t in r ){
+                    if (r[t] !== null && r[t] !== []){
+                        out.push(r[t]);
+                    }
+                }
+                return out;
+            };
             $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots").success(function (data, status, headers, config){
                 $scope.jinks.title = "Home";
-                allmenu = $scope.jinks.childrens = data;
 
+                $scope.jinks.childrens = data;
+                //$scope.$apply();
+                allmenu = data;
             });
             var sco = $rootScope;
             sco.watch('name',function (newV,oldV){
@@ -93,18 +143,33 @@ angular.module('main.components.main', [])
 
             };
 
-            $scope.select = function(e){
-                //alert("Ouai");
-                if (sco.article.title != $scope.jinks.title){
-                    //alert($scope.jinks.child);
-                    var v = $scope.getElByName($scope.jinks.childrens,sco.article.title);
-                    if(!v){
-                        v = $scope.getElByName(allmenu,sco.article.title);
-                    }
-                    if(v.childrens){
-                        $scope.jinks = v;
-                    }
-                }
+            $scope.select = function($event){
+
+                $event.preventDefault();
+
+                //console.log($event.target.attributes);
+                var protocol = $window.location.protocol;
+                $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
+                    .success(function (data, status, headers, config){
+
+                        $rootScope.article = data;
+                        $rootScope.name = data.title;
+
+                        if (data.title != $scope.jinks.title){
+                            //alert($scope.jinks.child);
+                            var v = $scope.getElByName($scope.jinks.childrens,data.title);
+                            if(!v){
+                                v = $scope.getElByName(allmenu,data.title);
+                            }
+                            if(v.childrens.length > 0){
+                                $scope.jinks = v;
+                            }
+                        }
+
+                        $window.location.href = $event.target.attributes['ng-href'].value;
+                        //$compile('article/article.html')($scope);
+                    });
+
 
             };
 

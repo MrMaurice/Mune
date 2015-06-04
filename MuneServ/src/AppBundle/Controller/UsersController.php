@@ -361,11 +361,12 @@ class UsersController extends FOSRestController
                             $p = $this->getDoctrine()
                                 ->getRepository('AppBundle\Entity\Article')
                                 ->findOneBy(array('id'=>$pare)) ;
-                            if(isset($p) ){
+                            if(isset($p) && $p->getId() != $article->getId() ){
                                 //$article->addParent($p);&& !$article->hasParent($p)
                                 $hasP = false;
-                                foreach($this->getParents($article) as $curA){
-                                    if ($curA === $p){
+                                //var_dump($this->getParents($article));
+                                foreach($this->getParents($p) as $curA){
+                                    if ($curA->getId() == $article->getId()){
                                         $hasP = true;
                                     }
                                 }

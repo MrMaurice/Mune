@@ -25,9 +25,83 @@ angular.module('main.board.edit', ['ngRoute'])
             if ($rootScope.panel !== "") {
                 $rootScope.changePanel("");
             }
-
+            var getById = function(array,lid){
+                for(var i in array){
+                    if(array[i].id==lid){
+                        return array[i];
+                    }
+                }
+                return null;
+            };
+            var getIndexById = function(array,lid){
+                for(var i in array){
+                    if(array[i].id==lid){
+                        return i;
+                    }
+                }
+                return null;
+            };
             var protocol = "http:";
+            $scope.getElById = function (_tab,_name){
+                var r = [];
+                for(var i in _tab){
+                    if(_tab[i].id == _name){
+                        return _tab[i];
+                    } else if(_tab[i].childrens.length > 0) {
+                        r.push((function(){
+                            var t= _tab[i];
+                            return $scope.getElById(t.childrens,_name);
+                        })());
+                    }
+                }
+                for (var t in r ){
+                    if (r[t] !== null){
+                        return r[t];
+                    }
+                }
+                return null;
+            };
+            $scope.getParentsElById = function (_tab,_name){
+                var r = [];
+                var rparent = [];
+                var out = [];
+                for(var i in _tab){
+                    if(_tab[i].id == _name){
 
+                        return [];
+                    } else if(_tab[i].childrens.length > 0 ) {//&& getById(_tab[i].childrens,_name) !== null
+
+                        rparent.push(_tab[i]);
+                        var direct =  getById(_tab[i].childrens,_name);
+                        var uhqshjsq = (function(){
+                            var t= _tab[i];
+                            return $scope.getParentsElById(t.childrens,_name);
+                        })();
+                        if(direct !== null){
+                            r.push(_tab[i]);
+                            console.log(_tab[i]);
+                        }
+                        else {
+                            for (var w in uhqshjsq){
+                                if(uhqshjsq[w] !== null && uhqshjsq[w] !== []){
+                                    r.push(uhqshjsq[w]);
+                                }
+                            }
+
+                            console.log(uhqshjsq);
+                        }
+
+
+                    }
+                }
+                for (var t in r ){
+                    if (r[t] !== null && r[t] !== []){
+                       out.push(r[t]);
+                    }
+                }
+                return out;
+            };
+            var rootArt;
             $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/' + $rootScope.usereId).
                 success(function (data) {
                     $scope.user = data;
@@ -36,37 +110,28 @@ angular.module('main.board.edit', ['ngRoute'])
                         success(function (data){
                             $rootScope.allarticles = data;
                         });
+                    $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/roots').
+                        success(function (data){
+                            rootArt = data;
 
                     if($routeParams.id !== "new"){
 
                         $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/' + $routeParams.id).
                             success(function (data) {
                                 $scope.Edarticle = data;
-                                for (var p in $scope.Edarticle.parents){
-                                    var tid = $scope.Edarticle.parents[p].id;
+                                $scope.Edarticle.parents = [];
+                                var prts = $scope.getParentsElById(rootArt, $scope.Edarticle.id);
+                                console.log(prts);
+                                for (var p in prts){
+                                    var tid = prts[p].id;
                                     $scope.Edarticle.parents[p] = tid.toString();
 
                                 }
-                                console.log($scope.Edarticle);
+                                console.log(prts);
                             });
                     }
+                        });
 
-                    var getById = function(array,lid){
-                        for(var i in array){
-                            if(array[i].id==lid){
-                                return array[i];
-                            }
-                        }
-                        return null;
-                    }
-                    var getIndexById = function(array,lid){
-                        for(var i in array){
-                            if(array[i].id==lid){
-                                return i;
-                            }
-                        }
-                        return null;
-                    }
 
                     $scope.edit = function (iform){
                         console.log(iform);

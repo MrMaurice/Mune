@@ -40,6 +40,13 @@ class ArticlesController extends FOSRestController
         $articles = $this->getDoctrine()
             ->getRepository('AppBundle\Entity\Article')
             ->findBy(array("status"=>"published")) ;
+        //$outArticles = array();
+
+        foreach ($articles as $art){
+            $art->setChildrens(null);
+            $this->resetAuthor($art);
+            $outArticles[] = $art;
+        }
 
         $view = View::create();
         $view->setData($articles);
@@ -57,9 +64,11 @@ class ArticlesController extends FOSRestController
         $auth->setRole($article->getAuthor()->getRole());
         $article->setAuthor($auth);
 
-        foreach($article->getChildrens()->toArray() as $oneart){
-            $this->resetAuthor($oneart);
-         }
+        if($article->getChildrens() !== null){
+            foreach($article->getChildrens()->toArray() as $oneart){
+                $this->resetAuthor($oneart);
+            }
+        }
     }
 
 
