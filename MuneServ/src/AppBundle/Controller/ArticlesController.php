@@ -48,6 +48,21 @@ class ArticlesController extends FOSRestController
 
     }// "get_articles"      [GET] /articles
 
+    public function resetAuthor($article){
+        $auth = new User();
+        //var_dump($this->author);
+        $auth->setEmail($article->getAuthor()->getEmail());
+        $auth->setId($article->getAuthor()->getId());
+        $auth->setUsername($article->getAuthor()->getUsername());
+        $auth->setRole($article->getAuthor()->getRole());
+        $article->setAuthor($auth);
+
+        foreach($article->getChildrens()->toArray() as $oneart){
+            $this->resetAuthor($oneart);
+         }
+    }
+
+
     public function getArticlesRootsAction() {
         $articles = $this->getDoctrine()
             ->getRepository('AppBundle\Entity\Article')
@@ -56,8 +71,7 @@ class ArticlesController extends FOSRestController
 
         foreach ($articles as $art){
             if(sizeOf($this->getParents($art)) < 1){
-                $art->setAuthor(null);
-                $art->getChildren()->forEach(function (item){});
+                $this->resetAuthor($art);
                 $outArticles[] = $art;
             }
         }
@@ -83,6 +97,7 @@ class ArticlesController extends FOSRestController
 
             if($sessmail = $request->getSession()->get('mail')) {
                 if (isset($user) && $sessmail == $user->getEmail()) {
+                    $this->resetAuthor($article);
                     $view = View::create();
                     $view->setData($article);
 
@@ -104,6 +119,8 @@ class ArticlesController extends FOSRestController
 
         }
         else {
+            $this->resetAuthor($article);
+
             $view = View::create();
             $view->setData($article);
 

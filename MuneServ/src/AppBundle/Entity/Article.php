@@ -97,14 +97,15 @@ class Article
      */
     public function getAuthor()
     {
-        $auth = new User();
-        $auth->setEmail($this->author->getEmail());
-        $auth->setId($this->author->getId());
-        $auth->setUsername($this->author->getUsername());
-        $auth->setRole($this->author->getRole());
+        /*$auth = new User();
+        //var_dump($this->author);
+        $auth->setEmail($this->author->id);
+        $auth->setId($this->author->email);
+        $auth->setUsername($this->author->email);
+        $auth->setRole($this->author->email);
+*/
 
-
-        return null;
+        return $this->author;
     }
 
     /**
