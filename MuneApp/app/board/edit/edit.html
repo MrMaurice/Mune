@@ -1,5 +1,7 @@
 <div >
-    <form name="inform" ng-submit="edit(Edarticle)">
+
+
+    <form name="inform" ng-submit="edit(Edarticle);">
         <p class="fade" ng-if="error" >{{ error }}</p>
         <p><label>Titre : </label><input name="titre" type="text" placeholder="Titre" ng-model="Edarticle.title" required/></p>
         <p class="fade" ng-if="Edarticle.status"><label  >Status : </label> <select ng-model="Edarticle.status">
