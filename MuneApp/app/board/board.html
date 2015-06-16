@@ -1,9 +1,11 @@
 <div>
     <h1>Espace Utilisateur : {{ user.username }}</h1>
     <p>{{ error }}</p>
-    <h2>Mes Articles</h2>
     <p><a href="#/edit/new">Proposer un  article</a></p>
-    <ul>
+
+    <h2 ng-click="seeMine()">Mes Articles</h2>
+    <h2 ng-click="seeAll()">Tous les Articles</h2>
+    <ul ng-if="articleList == 'mine'">
         <li class="slide" ng-repeat="article in user.articles">
             <strong>{{ article.title }}</strong>
             status : {{article.status}}
@@ -11,6 +13,10 @@
             <a  ng-click="supprArticle(article)">supprimer</a>
         </li>
     </ul>
+    <ul ng-if="articleList == 'all'">
+        <li ng-repeat="utem in allArticles" > <article-line source="utem"/></li>
+    </ul>
+
 
     
 </div>

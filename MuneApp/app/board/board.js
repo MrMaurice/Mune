@@ -110,12 +110,14 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
 
         if($rootScope.usereId == undefined){
             $window.location.href = "#/login";
+            return false;
         }
 
         else {
                 if($rootScope.panel !== "" && $rootScope.changePanel ){
                     $rootScope.changePanel("");
                 }
+            $scope.test = {machin:"Mushroom"};
                 var protocol = "http:";
                 $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId).
                     success (function (data){
@@ -123,6 +125,7 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
                     }).
                     error(function (data){
                         $window.location.href = "#/login";
+                        return false;
                     });
 
 
@@ -139,7 +142,18 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
                     }
 
                 }
+            $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots/full").success(function (data, status, headers, config){
 
+                $scope.allArticles = data;
+
+            });
+            $scope.articleList = "mine";
+            $scope.seeMine = function (){
+                $scope.articleList = "mine";
+            };
+            $scope.seeAll = function (){
+                $scope.articleList = "all";
+            };
 
 
 
@@ -148,4 +162,29 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
             };
 
 
-    });
+    })
+    .directive('articleLine', ['$compile',function($compile) {
+        return {
+            templateUrl: "board/articleline.html",
+            restrict: 'E',
+            replace:true,
+            scope: {
+                source:"="
+            },
+            link: function($scope, $element) {
+
+                    if($scope.source.childrens != undefined){
+                        var c = $compile(' <ul > <li  ng-cloak="" ng-repeat="item in source.childrens" ><article-line source="item"/></li> </ul>');
+                        c($scope, function(cloned, $scope){
+                            $element.append(cloned);
+                        });
+
+
+                    }
+
+
+            }
+        }
+    }])
+
+;

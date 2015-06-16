@@ -92,6 +92,25 @@ class ArticlesController extends FOSRestController
 
     }// "get_articles_roots"      [GET] /articles/roots
 
+    public function getArticlesRootsFullAction() {
+        $articles = $this->getDoctrine()
+            ->getRepository('AppBundle\Entity\Article')
+            ->findAll() ;
+        $outArticles = array();
+
+        foreach ($articles as $art){
+            if(sizeOf($this->getParents($art)) < 1){
+                $this->resetAuthor($art);
+                $outArticles[] = $art;
+            }
+        }
+
+        $view = View::create();
+        $view->setData($outArticles);
+
+        return $view;
+
+    }// "get_articles_roots"      [GET] /articles/roots
 
     public function getArticleAction($slug, Request $request)
     {

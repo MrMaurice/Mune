@@ -117,21 +117,49 @@ angular.module('main.board.edit', ['ngRoute'])
                         success(function (data){
                             rootArt = data;
 
-                    if($routeParams.id !== "new"){
+                            if($routeParams.id !== "new"){
 
-                        $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/' + $routeParams.id).
-                            success(function (data) {
-                                $scope.Edarticle = data;
-                                $scope.Edarticle.parents = [];
-                                var prts = $scope.getParentsElById(rootArt, $scope.Edarticle.id);
-                                console.log(prts);
-                                for (var p in prts){
-                                    var tid = prts[p].id;
-                                    $scope.Edarticle.parents[p] = tid.toString();
+                                $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/' + $routeParams.id).
+                                    success(function (data) {
+                                        $scope.Edarticle = data;
+                                        $scope.Edarticle.parents = [];
+                                        var prts = $scope.getParentsElById(rootArt, $scope.Edarticle.id);
+                                        for (var p in prts){
+                                            var tid = prts[p].id;
+                                            $scope.Edarticle.parents[p] = tid.toString();
 
-                                }
+                                        }
+
+                                        angular.element($('textarea')).ready(function () {
+                                            $('textarea').tinymce({plugins: [
+                                                "save lists link charmap preview anchor spellchecker",
+                                                "searchreplace visualblocks visualchars code fullscreen",
+                                                "insertdatetime table contextmenu paste textcolor colorpicker fullpage"
+                                            ],
+                                                menubar: false,
+                                                toolbar_items_size: 'small',
+
+                                                setup: function(editor) {
+                                                    editor.on('change', function(e) {
+                                                        console.log('change event', e.level.content);
+                                                        $scope.Edarticle.texte = e.level.content;
+                                                    });
+                                                },
+
+
+
+                                                toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | forecolor backcolor | formatselect",
+                                                toolbar2: "table | bullist numlist | subscript superscript | outdent indent blockquote | link unlink anchor code | insertdatetime",
+                                                toolbar3: "cut copy paste |  undo redo | searchreplace | removeformat | charmap | preview fullscreen | spellchecker | visualblocks",
+                                            });
+
+                                        });
+
+
+
+                                    });
+                            } else {
                                 angular.element($('textarea')).ready(function () {
-                                    console.log('Hello World');
                                     $('textarea').tinymce({plugins: [
                                         "save lists link charmap preview anchor spellchecker",
                                         "searchreplace visualblocks visualchars code fullscreen",
@@ -155,10 +183,7 @@ angular.module('main.board.edit', ['ngRoute'])
                                     });
 
                                 });
-                                console.log(prts);
-
-                            });
-                    }
+                            }
                         });
 
 
