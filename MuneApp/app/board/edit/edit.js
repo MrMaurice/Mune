@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('main.board.edit', ['ngRoute'])
+angular.module('main.board.edit', ['ngRoute','main.utils'])
 
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/edit/:id', {
@@ -9,7 +9,7 @@ angular.module('main.board.edit', ['ngRoute'])
         })
 
     }])
-    .controller('editCtrl', function($rootScope,$scope, $http, $window,$routeParams) {
+    .controller('editCtrl', ['$rootScope','$scope','$http','$window','$routeParams','resourceManager',function($rootScope,$scope, $http, $window,$routeParams,resourceManager) {
         if($rootScope.panel !== ""){
             $rootScope.changePanel("");
         }
@@ -69,7 +69,7 @@ angular.module('main.board.edit', ['ngRoute'])
                     if(_tab[i].id == _name){
 
                         return [];
-                    } else if(_tab[i].childrens.length > 0 ) {//&& getById(_tab[i].childrens,_name) !== null
+                    } else if(_tab[i].childrens != undefined && _tab[i].childrens.length > 0 ) {//&& getById(_tab[i].childrens,_name) !== null
 
                         rparent.push(_tab[i]);
                         var direct =  getById(_tab[i].childrens,_name);
@@ -87,8 +87,6 @@ angular.module('main.board.edit', ['ngRoute'])
                                     r.push(uhqshjsq[w]);
                                 }
                             }
-
-                            console.log(uhqshjsq);
                         }
 
 
@@ -105,22 +103,30 @@ angular.module('main.board.edit', ['ngRoute'])
 
 
             //$('#tinymce').attr('ng-bindHtml','Edarticle.texte');
-            $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/' + $rootScope.usereId).
-                success(function (data) {
+
+            //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/' + $rootScope.usereId).
+            resourceManager.User.get({id:$rootScope.usereId},
+               // success(function (data) {
+                function (data){
                     $scope.user = data;
 
-                    $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles').
+                    /*$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles').
                         success(function (data){
                             $rootScope.allarticles = data;
-                        });
-                    $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/roots').
-                        success(function (data){
+                        });*/
+                    resourceManager.Articles.query(function (data){
+                        $rootScope.allarticles = data;
+                    });
+                    //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/roots').
+                    resourceManager.RootArticles.query(function (data){
+                    //success(function (data){
                             rootArt = data;
 
                             if($routeParams.id !== "new"){
 
-                                $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/' + $routeParams.id).
-                                    success(function (data) {
+                                //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/' + $routeParams.id).
+                                    //success(function (data) {
+                                resourceManager.Article.get({id:$routeParams.id},function (data){
                                         $scope.Edarticle = data;
                                         $scope.Edarticle.parents = [];
                                         var prts = $scope.getParentsElById(rootArt, $scope.Edarticle.id);
@@ -150,7 +156,7 @@ angular.module('main.board.edit', ['ngRoute'])
 
                                                 toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | forecolor backcolor | formatselect",
                                                 toolbar2: "table | bullist numlist | subscript superscript | outdent indent blockquote | link unlink anchor code | insertdatetime",
-                                                toolbar3: "cut copy paste |  undo redo | searchreplace | removeformat | charmap | preview fullscreen | spellchecker | visualblocks",
+                                                toolbar3: "cut copy paste |  undo redo | searchreplace | removeformat | charmap | preview fullscreen | spellchecker | visualblocks"
                                             });
 
                                         });
@@ -179,7 +185,7 @@ angular.module('main.board.edit', ['ngRoute'])
 
                                         toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | forecolor backcolor | formatselect",
                                         toolbar2: "table | bullist numlist | subscript superscript | outdent indent blockquote | link unlink anchor code | insertdatetime",
-                                        toolbar3: "cut copy paste |  undo redo | searchreplace | removeformat | charmap | preview fullscreen | spellchecker | visualblocks",
+                                        toolbar3: "cut copy paste |  undo redo | searchreplace | removeformat | charmap | preview fullscreen | spellchecker | visualblocks"
                                     });
 
                                 });
@@ -193,12 +199,20 @@ angular.module('main.board.edit', ['ngRoute'])
                         if($routeParams.id === "new"){
                             //$scope.user.articles.push(iform);
 
-                            $http.post(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$scope.user.id+'/articles',$scope.Edarticle).
-                                success(function (data) {
+                            //$http.post(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$scope.user.id+'/articles',$scope.Edarticle).
+                             //   success(function (data) {
+                            iform.authorId = $scope.user.id;
+                            resourceManager.UserArticle.new(iform,function (data){
                                     $scope.Edarticle = data;
-                                    $window.location.href = "#/board";
-                                }).
-                                error(function (data,st){
+                                resourceManager.Articles.clearCached();
+                                resourceManager.FullRootArticles.clearCached();
+                                resourceManager.RootArticles.clearCached();
+                                resourceManager.UserArticles.clearCached({authorId:iform.authorId});
+                                resourceManager.UserArticle.clearCached({authorId:iform.authorId,id:iform.id});
+
+                                $window.location.href = "#/board";
+
+                                },function (data,st){
                                     if(st == 500){
                                         $scope.error = "Un article avec ce nom existe déjà";
 
@@ -207,12 +221,21 @@ angular.module('main.board.edit', ['ngRoute'])
                                     }
                                 });
                         } else {
-                            $http.put(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$scope.user.id+'/articles/'+$routeParams.id,iform).
-                                success(function (data) {
+
+                            //$http.put(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$scope.user.id+'/articles/'+$routeParams.id,iform).
+                             //   success(function (data) {
+                            iform.authorId = $scope.user.id;
+                            resourceManager.UserArticle.update(iform,function (data){
                                     $scope.Edarticle = data;
+                                resourceManager.Articles.clearCached();
+                                resourceManager.FullRootArticles.clearCached();
+                                resourceManager.RootArticles.clearCached();
+                                resourceManager.Article.clearCached({id:iform.id});
+                                resourceManager.UserArticles.clearCached({authorId:iform.authorId});
+
+                                resourceManager.UserArticle.clearCached({authorId:iform.authorId,id:iform.id});
                                     $window.location.href = "#/board";
-                                }).
-                                error(function (data,st){
+                                },function (data,st){
                                     $scope.error = data.error;
 
                                 });
@@ -221,13 +244,12 @@ angular.module('main.board.edit', ['ngRoute'])
 
                     }
 
-                }).
-                error(function (data) {
+                },function (data) {
                     $window.location.href = "#/login";
                 });
         }
 
 
 
-        })
+        }])
 ;

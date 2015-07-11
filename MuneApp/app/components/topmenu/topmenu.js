@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('main.components.top', [])
-.directive('topmenu', [function() {
+angular.module('main.components.top', ['main.utils'])
+.directive('topmenu', ['resourceManager',function(resourceManager) {
     return {
         templateUrl:"components/topmenu/topmenu.html",
         restrict: 'E',
@@ -10,7 +10,9 @@ angular.module('main.components.top', [])
         controller: function($rootScope, $scope, $element, $http, $window) {
             var protocol = $window.location.protocol;
             var links = $scope.links = [];
-            $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots").success(function (data, status, headers, config){
+           // $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots")
+             //   .success(function (data, status, headers, config){
+            resourceManager.RootArticles.query(function (data, status, headers, config){
                 links = $scope.links = data;
 
                 $scope.select = function($event){
@@ -18,9 +20,9 @@ angular.module('main.components.top', [])
                     $event.preventDefault();
 
                     //console.log($event.target.attributes);
-                    $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
-                        .success(function (data, status, headers, config){
-
+                    //$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
+                    //    .success(function (data, status, headers, config){
+                    resourceManager.Article.get({id:$event.target.attributes.route.value},function (data, status, headers, config){
                             $rootScope.article = data;
                             $rootScope.name = data.title;
 

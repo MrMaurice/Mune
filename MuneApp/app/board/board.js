@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('main.board', ['ngRoute','main.board.edit'])
+angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
 
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/board', {
@@ -13,7 +13,7 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
         });
 
     }])
-    .controller('loginCtrl', function($rootScope,$scope, $http, $window) {
+    .controller('loginCtrl', ['$rootScope','$scope','$http','$window','resourceManager',function($rootScope,$scope, $http, $window,resourceManager) {
         if($rootScope.panel !== "" && $rootScope.changePanel ){
             $rootScope.changePanel("");
         }
@@ -82,7 +82,7 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
                 //alert(iform.mail+" "+iform.password);
                 iform.username = iform.name+" "+iform.surname;
 
-                $http.post(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users', iform).
+                /*$http.post(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users', iform).
                     success(function (data){
                         $scope.toSignIn();
                         $scope.serverError = "Vous êtes enregistré, vous pouvez vous connecter."
@@ -95,15 +95,27 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
                             $scope.serverError = 'Erreur : '+data.error;
                         }
 
-                    });
+                    });*/
+
+                resourceManager.User.save(iform,function (data){
+                    $scope.toSignIn();
+                    $scope.serverError = "Vous êtes enregistré, vous pouvez vous connecter."
+                },function (data,st,h,c){
+                    if(st === 500){
+                        $scope.serverError = 'Un compte avec cet email existe déjà.';
+                    }
+                    else {
+                        $scope.serverError = 'Erreur : '+data.error;
+                    }
+
+                });
 
 
         }
 
-    })
+    }])
 
-    .controller('boardCtrl', function($rootScope,$scope, $http, $window) {
-        console.log($window.location.protocol);
+    .controller('boardCtrl', ['$rootScope','$scope','$http','$window','resourceManager',function($rootScope,$scope, $http, $window,resourceManager) {
          /*if($window.location.protocol !== "https"){
          $window.location.protocol = "https";
          }*/
@@ -117,36 +129,47 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
                 if($rootScope.panel !== "" && $rootScope.changePanel ){
                     $rootScope.changePanel("");
                 }
-            $scope.test = {machin:"Mushroom"};
+
                 var protocol = "http:";
-                $http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId).
-                    success (function (data){
-                        $scope.user = data;
-                    }).
-                    error(function (data){
-                        $window.location.href = "#/login";
-                        return false;
-                    });
+                //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId).
+               var user = resourceManager.User.get({id:$rootScope.usereId},
+                   function(data){$scope.user = data;},
+                   function (data){
+                       $window.location.href = "#/login";
+                       return false;
+                   });
+                //$scope.user = user;
 
 
                 $scope.supprArticle = function (item){
                     if($window.confirm('Vous allez supprimer définitivement cet article.')){
-                        $http.delete(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId+"/articles/"+item.id)
+                        /*$http.delete(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId+"/articles/"+item.id)
                             .success(function(data){
                                 $scope.user = data;
 
                             })
                             .error(function (data){
                                 $scope.error = data.error;
-                            })
+                            });*/
+                        resourceManager.UserArticle.remove({authorId:$rootScope.usereId,id:item.id},function(data){
+                            resourceManager.User.clearCached({id:$rootScope.usereId});
+                            $scope.user = data;
+
+                        },function (data){
+                            $scope.error = data.error;
+                        });
                     }
 
-                }
-            $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots/full").success(function (data, status, headers, config){
+                };
+            /*$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots/full").success(function (data, status, headers, config){
 
                 $scope.allArticles = data;
 
+            });*/
+            var allArticles = resourceManager.FullRootArticles.query(function (data){
+                $scope.allArticles = data;
             });
+            //$scope.allArticles = allArticles;
             $scope.articleList = "mine";
             $scope.seeMine = function (){
                 $scope.articleList = "mine";
@@ -159,10 +182,10 @@ angular.module('main.board', ['ngRoute','main.board.edit'])
 
 
 
-            };
+            }
 
 
-    })
+    }])
     .directive('articleLine', ['$compile',function($compile) {
         return {
             templateUrl: "board/articleline.html",

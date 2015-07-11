@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('main.components.main', [])
-.directive('mainmenu', [function() {
+angular.module('main.components.main', ['main.utils'])
+.directive('mainmenu', ['resourceManager',function(resourceManager) {
     return {
         templateUrl:"components/mainmenu/mainmenu.html",
         restrict: 'E',
@@ -100,7 +100,9 @@ angular.module('main.components.main', [])
                 }
                 return out;
             };
-            $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots").success(function (data, status, headers, config){
+            //$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots")
+             //   .success(function (data, status, headers, config){
+            resourceManager.RootArticles.query(function (data, status, headers, config){
                 $scope.jinks.title = "Home";
 
                 $scope.jinks.childrens = data;
@@ -149,8 +151,9 @@ angular.module('main.components.main', [])
 
                 //console.log($event.target.attributes);
                 var protocol = $window.location.protocol;
-                $http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
-                    .success(function (data, status, headers, config){
+                //$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
+                  //  .success(function (data, status, headers, config){
+                resourceManager.Article.get({id:$event.target.attributes.route.value},function (data, status, headers, config){
 
                         $rootScope.article = data;
                         $rootScope.name = data.title;
