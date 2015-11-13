@@ -1,9 +1,9 @@
 <nav >
-    <h3 ng-cloak ng-click="selectParent()">&lsaquo; {{jinks.title}}</h3>
+    <h3 ng-cloak class="cus-button" ng-click="selectParent()">&lsaquo; {{jinks.title}}</h3>
     <ul class="nav nav-tabs">
         <li ng-repeat="item in jinks.childrens" ><!--jinks.childrens -->
 
-            <a ng-cloak route="{{item.id}}" class="fade"-ng-class="{upable: {{ link.childrens.length > 0 }} }" ng-click="select($event)" ng-href="#/article/{{item.id}}" >{{item.title}} </a>
+            <a ng-cloak route="{{item.id}}" class="fade" ng-class="{upable: {{ item.childrens.length > 0 }} }" ng-click="select($event)" ng-href="#/article/{{item.id}}" >{{item.title}} </a>
         </li>
     </ul>
 </nav>

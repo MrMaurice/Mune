@@ -17,7 +17,6 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
         if($rootScope.panel !== "" && $rootScope.changePanel ){
             $rootScope.changePanel("");
         }
-        console.log($window.location.protocol);
         /* if($window.location.protocol !== "https"){
          $window.location.protocol = "https";
          }*/
@@ -45,7 +44,6 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
             $scope.signin = true;
         }
         $scope.checkCredentials = function (iform){
-            console.log(iform);
             // alert(iform.mail+" "+iform.password);
             if(iform.remember){
                 //alert(iform.mail+" "+iform.password);
@@ -57,9 +55,10 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
                 localStorage['pass'] = null;
             }
 
+            $rootScope.loading = true;
             $http.put(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/login',{"password":iform.password,"email":iform.email}).
                 success(function (data,st,h,c){
-                    console.log(data);
+                    $rootScope.loading = false;
                     $rootScope.usereId = data.id;
                     $rootScope.currentTocken = data.salt;
 
@@ -70,13 +69,11 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
 
 
                     $scope.serverError = 'Erreur : '+data.error;
-                    console.log(data);
                 });
         }
 
         $scope.subscribe = function (iform){
-            console.log(iform);
-            console.log($scope.registringUser);
+
             // alert(iform.mail+" "+iform.password);
 
                 //alert(iform.mail+" "+iform.password);
@@ -132,10 +129,15 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
 
                 var protocol = "http:";
                 //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$rootScope.usereId).
-               var user = resourceManager.User.get({id:$rootScope.usereId},
-                   function(data){$scope.user = data;},
+                $rootScope.loading = true;
+                var user = resourceManager.User.get({id:$rootScope.usereId},
+                   function(data){
+                       $scope.user = data;
+                       $rootScope.loading = false;
+                   },
                    function (data){
                        $window.location.href = "#/login";
+                       $rootScope.loading = false;
                        return false;
                    });
                 //$scope.user = user;
@@ -151,7 +153,9 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
                             .error(function (data){
                                 $scope.error = data.error;
                             });*/
+                        $rootScope.loading = true;
                         resourceManager.UserArticle.remove({authorId:$rootScope.usereId,id:item.id},function(data){
+                            $rootScope.loading = false;
                             resourceManager.User.clearCached({id:$rootScope.usereId});
                             $scope.user = data;
 
@@ -166,7 +170,9 @@ angular.module('main.board', ['ngRoute','main.board.edit','main.utils'])
                 $scope.allArticles = data;
 
             });*/
+            $rootScope.loading = true;
             var allArticles = resourceManager.FullRootArticles.query(function (data){
+                $rootScope.loading = false;
                 $scope.allArticles = data;
             });
             //$scope.allArticles = allArticles;

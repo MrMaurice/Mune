@@ -22,7 +22,9 @@ angular.module('main.components.top', ['main.utils'])
                     //console.log($event.target.attributes);
                     //$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
                     //    .success(function (data, status, headers, config){
+                    $rootScope.loading = true;
                     resourceManager.Article.get({id:$event.target.attributes.route.value},function (data, status, headers, config){
+                            $rootScope.loading = false;
                             $rootScope.article = data;
                             $rootScope.name = data.title;
 

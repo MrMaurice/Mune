@@ -37,7 +37,7 @@ angular.module('main.components.main', ['main.utils'])
                     if(_tab[i].title == _name){
 
                         return {title:"Home",childrens:_tab};
-                    } else if(_tab[i].childrens.length > 0) {
+                    } else if(_tab[i].childrens != undefined && _tab[i].childrens.length > 0) {
                         rparent.push(_tab[i]);
                         r.push((function(){
                             var t= _tab[i];
@@ -68,7 +68,7 @@ angular.module('main.components.main', ['main.utils'])
                     if(_tab[i].title == _name){
 
                         return [];
-                    } else if(_tab[i].childrens.length > 0 ) {//&& getById(_tab[i].childrens,_name) !== null
+                    } else if(_tab[i].childrens != undefined && _tab[i].childrens.length > 0 ) {//&& getById(_tab[i].childrens,_name) !== null
 
                         rparent.push(_tab[i]);
                         var direct =  getByName(_tab[i].childrens,_name);
@@ -102,7 +102,9 @@ angular.module('main.components.main', ['main.utils'])
             };
             //$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/roots")
              //   .success(function (data, status, headers, config){
+            $rootScope.loading = true;
             resourceManager.RootArticles.query(function (data, status, headers, config){
+                $rootScope.loading = false;
                 $scope.jinks.title = "Home";
 
                 $scope.jinks.childrens = data;
@@ -153,8 +155,9 @@ angular.module('main.components.main', ['main.utils'])
                 var protocol = $window.location.protocol;
                 //$http.get(protocol+"//"+$window.location.host+"/MuneJDR/MuneServ/web/app_dev.php/articles/"+$event.target.attributes.route.value)
                   //  .success(function (data, status, headers, config){
+                $rootScope.loading = true;
                 resourceManager.Article.get({id:$event.target.attributes.route.value},function (data, status, headers, config){
-
+                    $rootScope.loading = false;
                         $rootScope.article = data;
                         $rootScope.name = data.title;
 

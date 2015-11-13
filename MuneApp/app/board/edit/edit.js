@@ -13,7 +13,6 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
         if($rootScope.panel !== ""){
             $rootScope.changePanel("");
         }
-        console.log($window.location.protocol);
          /*if($window.location.protocol !== "https"){
          $window.location.protocol = "https";
          }*/
@@ -47,7 +46,7 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
                 for(var i in _tab){
                     if(_tab[i].id == _name){
                         return _tab[i];
-                    } else if(_tab[i].childrens.length > 0) {
+                    } else if(_tab[i].childrens != undefined && _tab[i].childrens.length > 0) {
                         r.push((function(){
                             var t= _tab[i];
                             return $scope.getElById(t.childrens,_name);
@@ -105,6 +104,7 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
             //$('#tinymce').attr('ng-bindHtml','Edarticle.texte');
 
             //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/' + $rootScope.usereId).
+            $rootScope.loading = true;
             resourceManager.User.get({id:$rootScope.usereId},
                // success(function (data) {
                 function (data){
@@ -114,19 +114,25 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
                         success(function (data){
                             $rootScope.allarticles = data;
                         });*/
+                    $rootScope.loading = true;
                     resourceManager.Articles.query(function (data){
+                        $rootScope.loading = false;
                         $rootScope.allarticles = data;
                     });
                     //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/roots').
+                    $rootScope.loading = true;
                     resourceManager.RootArticles.query(function (data){
                     //success(function (data){
                             rootArt = data;
+                        $rootScope.loading = false;
 
                             if($routeParams.id !== "new"){
 
                                 //$http.get(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/articles/' + $routeParams.id).
                                     //success(function (data) {
+                                $rootScope.loading = true;
                                 resourceManager.Article.get({id:$routeParams.id},function (data){
+                                    $rootScope.loading = false;
                                         $scope.Edarticle = data;
                                         $scope.Edarticle.parents = [];
                                         var prts = $scope.getParentsElById(rootArt, $scope.Edarticle.id);
@@ -147,7 +153,6 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
 
                                                 setup: function(editor) {
                                                     editor.on('change', function(e) {
-                                                        console.log('change event', e.level.content);
                                                         $scope.Edarticle.texte = e.level.content;
                                                     });
                                                 },
@@ -176,7 +181,6 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
 
                                         setup: function(editor) {
                                             editor.on('change', function(e) {
-                                                console.log('change event', e.level.content);
                                                 $scope.Edarticle.texte = e.level.content;
                                             });
                                         },
@@ -202,13 +206,15 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
                             //$http.post(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$scope.user.id+'/articles',$scope.Edarticle).
                              //   success(function (data) {
                             iform.authorId = $scope.user.id;
+                            $rootScope.loading = true;
                             resourceManager.UserArticle.new(iform,function (data){
+                                $rootScope.loading = false;
                                     $scope.Edarticle = data;
                                 resourceManager.Articles.clearCached();
                                 resourceManager.FullRootArticles.clearCached();
                                 resourceManager.RootArticles.clearCached();
-                                resourceManager.UserArticles.clearCached({authorId:iform.authorId});
-                                resourceManager.UserArticle.clearCached({authorId:iform.authorId,id:iform.id});
+                                resourceManager.User.clearCached({id:$scope.user.id});
+                                //resourceManager.UserArticle.clearCached({authorId:iform.authorId,id:iform.id});
 
                                 $window.location.href = "#/board";
 
@@ -225,15 +231,17 @@ angular.module('main.board.edit', ['ngRoute','main.utils'])
                             //$http.put(protocol+'//'+$window.location.host+'/MuneJDR/MuneServ/web/app_dev.php/users/'+$scope.user.id+'/articles/'+$routeParams.id,iform).
                              //   success(function (data) {
                             iform.authorId = $scope.user.id;
+                            $rootScope.loading = true;
                             resourceManager.UserArticle.update(iform,function (data){
+                                $rootScope.loading = false;
                                     $scope.Edarticle = data;
                                 resourceManager.Articles.clearCached();
                                 resourceManager.FullRootArticles.clearCached();
                                 resourceManager.RootArticles.clearCached();
                                 resourceManager.Article.clearCached({id:iform.id});
-                                resourceManager.UserArticles.clearCached({authorId:iform.authorId});
+                                resourceManager.User.clearCached({id: $scope.user.id});
 
-                                resourceManager.UserArticle.clearCached({authorId:iform.authorId,id:iform.id});
+                                //resourceManager.UserArticle.clearCached({authorId:iform.authorId,id:iform.id});
                                     $window.location.href = "#/board";
                                 },function (data,st){
                                     $scope.error = data.error;

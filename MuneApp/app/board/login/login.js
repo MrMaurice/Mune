@@ -37,7 +37,6 @@ angular.module('main.board', ['ngRoute'])
             $scope.signin = true;
         }
         $scope.checkCredentials = function (iform){
-            console.log(iform);
             // alert(iform.mail+" "+iform.password);
             if(iform.remember){
                 //alert(iform.mail+" "+iform.password);
@@ -60,7 +59,6 @@ angular.module('main.board', ['ngRoute'])
         }
 
         $scope.subscribe = function (iform){
-            console.log(iform);
             // alert(iform.mail+" "+iform.password);
             if(iform.cgu){
                 //alert(iform.mail+" "+iform.password);

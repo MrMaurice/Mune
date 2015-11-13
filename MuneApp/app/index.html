@@ -21,7 +21,7 @@
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
-<header>
+<header ng-class="{loading: loading}">
     <nav>
 
         <topmenu></topmenu>
@@ -34,18 +34,20 @@
 </header>
 
 
+<section class="row-wrapper">
+    <aside>
+        <panel class="slide">
 
-<aside>
-    <panel class="slide">
+        </panel>
 
-    </panel>
+    </aside>
 
-</aside>
-
-  <div class="slide" id="view" ng-view>
+    <div class="slide" id="view" ng-view>
 
 
-  </div>
+    </div>
+</section>
+
 
 
 

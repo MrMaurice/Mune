@@ -1,16 +1,20 @@
 <div>
     <h1>Espace Utilisateur : {{ user.username }}</h1>
     <p>{{ error }}</p>
-    <p><a href="#/edit/new">Proposer un  article</a></p>
+    <p><a class="cus-button" href="#/edit/new">Proposer un  article</a></p>
 
-    <h2 ng-click="seeMine()">Mes Articles</h2>
-    <h2 ng-click="seeAll()">Tous les Articles</h2>
+    <h2 class="cus-button cusactive" ng-if="articleList == 'mine'" ng-click="seeMine()">Mes Articles</h2>
+    <h2 class="cus-button"  ng-if="articleList != 'mine'" ng-click="seeMine()">Mes Articles</h2>
+
+    <h2 class="cus-button cusactive" ng-if="articleList == 'all'" ng-click="seeAll()">Tous les Articles</h2>
+    <h2 class="cus-button" ng-if="articleList != 'all'" ng-click="seeAll()">Tous les Articles</h2>
+
     <ul ng-if="articleList == 'mine'">
         <li class="slide" ng-repeat="article in user.articles">
             <strong>{{ article.title }}</strong>
             status : {{article.status}}
-            <a  ng-href="#/edit/{{ article.id }}" >modifier</a>
-            <a  ng-click="supprArticle(article)">supprimer</a>
+            <a class="cus-button"  ng-href="#/edit/{{ article.id }}" >modifier</a>
+            <a class="cus-button"  ng-click="supprArticle(article)">supprimer</a>
         </li>
     </ul>
     <ul ng-if="articleList == 'all'">

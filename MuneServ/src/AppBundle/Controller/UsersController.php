@@ -73,13 +73,28 @@ class UsersController extends FOSRestController
 
 
     }
+    /*private function resetAr($article){
+        $auth = new User();
+        //var_dump($this->author);
+        $auth->setEmail($article->getAuthor()->getEmail());
+        $auth->setId($article->getAuthor()->getId());
+        $auth->setUsername($article->getAuthor()->getUsername());
+        $auth->setRole($article->getAuthor()->getRole());
+        $article->setAuthor($auth);
 
+        if($article->getChildrens() !== null){
+            foreach($article->getChildrens()->toArray() as $oneart){
+                $this->resetAuthor($oneart);
+            }
+        }
+    }*/
 
     public function getUsersAction() {
         $users = $this->getDoctrine()
             ->getRepository('AppBundle\Entity\User')
             ->findAll() ;
 
+        //var_dump($outUsers);
         $view = View::create();
         $view->setData($users);
 
@@ -486,6 +501,65 @@ class UsersController extends FOSRestController
                     $view->setData($return);
 
                     return $view;
+
+
+
+            } else {
+                $view = View::create();
+                $view->setStatusCode(401);
+                $view->setData(array("error"=>"need authentification"));
+
+                return $view;
+            }
+
+
+        } else {
+            $view = View::create();
+            $view->setStatusCode(401);
+            $view->setData(array("error"=>"need authentification"));
+
+            return $view;
+        }
+
+
+    } // "delete_user_comment"  [DELETE] /users/{slug}/comments/{id}
+
+    public function postUserArticleStatusAction($slug, $id, Request $request)
+    {
+        if($sessmail = $request->getSession()->get('mail')){
+
+            $user = $this->getDoctrine()
+                ->getRepository('AppBundle\Entity\User')
+                ->findOneBy(array('id'=>$slug)) ;
+
+            if( isset($user) && $sessmail == $user->getEmail()){
+
+
+                $article = $this->getDoctrine()
+                    ->getRepository('AppBundle\Entity\Article')
+                    ->findOneBy(array('id'=>$id)) ;
+
+
+
+                $em = $this->getDoctrine()->getManager();
+                $code = 200;
+
+
+
+                $articl = json_decode($request->getContent());
+
+                $article->setStatus($articl->status);
+
+                $em->persist($article);
+                $em->flush();
+
+                $return = $user;
+
+                $view = View::create();
+                $view->setStatusCode($code);
+                $view->setData($return);
+
+                return $view;
 
 
 

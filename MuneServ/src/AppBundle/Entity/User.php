@@ -10,6 +10,8 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Exclude;
 
 
 /**
@@ -19,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\Table
 
  */
-class User implements UserInterface, \Serializable
+class User implements UserInterface, \Serializable, \JsonSerializable
 {
     /**
      * @ORM\Column(type="integer")
@@ -37,6 +39,7 @@ class User implements UserInterface, \Serializable
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Exclude
      */
     private $password;
 
@@ -74,6 +77,21 @@ class User implements UserInterface, \Serializable
     public function setArticles($articles)
     {
         $this->articles = $articles;
+    }
+
+    /**
+     * @param mixed $articles
+     */
+    public function getArticlesLighter()
+    {
+        $articlesLighter = array();
+        foreach($this->articles as $anarticle){
+            $author = $anarticle->getAuthor();
+            $anarticle->setAuthor($author->getId());
+            $articlesLighter[] = $anarticle;
+        }
+
+        return $articlesLighter;
     }
 
     /**
@@ -275,4 +293,27 @@ class User implements UserInterface, \Serializable
         //$this->salt
         ) = unserialize($serialized);
 }
+
+
+    /**
+     * (PHP 5 &gt;= 5.4.0)<br/>
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed
+     * data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     */
+    public function jsonSerialize()
+    {
+        // TODO: Implement jsonSerialize() method.
+
+        return array(
+            "id" => $this->id,
+            "username" => $this->username,
+            "email" => $this->email,
+            "role" => $this->role,
+            "articles" => $this->getArticles()
+        );
+
+    }
 }

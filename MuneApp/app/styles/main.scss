@@ -1,6 +1,14 @@
+html {
+  height: 100%;
+}
 body {
   color:rgb(30,30,30);
   background: rgba(20,20,11,0.1);
+  height:100%;
+}
+section.row-wrapper {
+  display:table;
+  width: 100%;
 }
 header {
   background: linear-gradient(to top, rgba(20, 19, 3, 0.94), rgb(18, 14, 1));
@@ -35,18 +43,23 @@ header {
     }
   }
 }
+header.loading {
+  background: right center no-repeat url('../assets/gears.gif'),
+  linear-gradient(to top, rgba(20, 19, 3, 0.94), rgb(18, 14, 1));
+}
 aside {
   margin:0;
   margin-right:5%;
   padding:0;
   width:30%;
-  
-  min-height:100%;
-  float:left;
+  background:rgba(20,12,6,0.15);
+  border-right:2px solid rgba(20,12,6,0.4);
+  /*min-height:92.5%;float:left;*/
+  display: table-cell;
+
   nav {
     padding: 20px;
-    background:rgba(20,12,6,0.15);
-    border-right:2px solid rgba(20,12,6,0.4);
+
     a{
       text-shadow:  0 0 0 rgba(221, 213, 203, 0.9);
       transition: all 300ms 100ms;
@@ -65,8 +78,20 @@ a{
   color:rgb(40,40,30);
 }
 div#view{
-  margin-left:5%;
+  padding-left:5%;
+  display: table-cell;
 }
 a.upable:after {
-  content:"›";
+  content:url('../assets/puce_plus.png');
+}
+
+.cus-button {
+  display: inline-block;
+  line-height: 120%;
+  border-bottom: dotted 1px rgba(40,40,30,0.3);
+  cursor: pointer;
+  padding: 0 3px;
+}
+.cusactive {
+  background: rgba(255, 255, 240, 0.52);
 }

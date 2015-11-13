@@ -6,7 +6,7 @@
         <p><label>Se souvenir de moi. </label><input name="remember" type="checkbox" ng-model="registredUser.remember"/></p>
         <p><input type="submit" value="Connexion"/></p>
     </form>
-    <p><a href="" ng-click="toSignUp()">Pas encore inscrit ?</a></p>
+    <p><a href="" class="cus-button"  ng-click="toSignUp()">Pas encore inscrit ?</a></p>
 </div>
 
 <div ng-if="!signin">
@@ -20,5 +20,5 @@
         <p><label>J'ai lu et j'accepte les conditions d'utilisation du site et la politique de confidentialité du site. </label><input name="cgu" ng-model="registringUser.cgu" type="checkbox" required/></p>
         <p><input type="submit" value="S'enregistrer"/></p>
     </form>
-    <p><a href="" ng-click="toSignIn()">Déjà inscrit ?</a></p>
+    <p><a class="cus-button" href="" ng-click="toSignIn()">Déjà inscrit ?</a></p>
 </div>
